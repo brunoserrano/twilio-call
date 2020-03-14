@@ -4,12 +4,15 @@
 
 import "./i18n"
 import React, { useState, useEffect } from "react"
-import { YellowBox } from "react-native"
+import { YellowBox, PermissionsAndroid, Platform, TouchableHighlight, View, TouchableOpacity, ActivityIndicator } from "react-native"
 import { StatefulNavigator, BackButtonHandler, exitRoutes } from "./navigation"
 import { RootStore, RootStoreProvider, setupRootStore } from "./models/root-store"
+import Twilio from "react-native-twilio-programmable-voice"
 
 import { contains } from "ramda"
 import { enableScreens } from "react-native-screens"
+import { Screen, Text, TextField, Button } from "./components"
+import { color } from "./theme"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -47,14 +50,41 @@ Object.defineProperty(ReactNative, "AsyncStorage", {
  */
 const canExit = (routeName: string) => contains(routeName, exitRoutes)
 
+const getAuthToken = () => {
+  return fetch('http://b8a63657.ngrok.io/accessToken', {
+    method: 'get'
+  })
+  .then(response => response.text())
+  .catch(error => console.error(error))
+}
+
+const getMicrophonePermission = () => {
+  const audioPermission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+
+  return PermissionsAndroid.check(audioPermission).then(async result => {
+    if (!result) {
+      const granted = await PermissionsAndroid.request(audioPermission, {
+        title: 'Microphone Permission',
+        message: 'For this app work properly, we will need access to your microphone. Can you grant access for us?',
+        buttonPositive: 'Yes, I do!',
+        buttonNegative: "No, I'm afraid"
+      })
+
+      return granted
+    }
+
+    return result
+  })
+}
+
 /**
  * This is the root component of our app.
  */
 export default function App() {
-  const [rootStore, setRootStore] = useState<RootStore | undefined>(undefined) // prettier-ignore
+  const [state, setState] = useState<RootStore | undefined>(undefined) // prettier-ignore
   useEffect(() => {
     ;(async () => {
-      setupRootStore().then(setRootStore)
+      setupRootStore().then(setState)
     })()
   }, [])
 
@@ -66,16 +96,70 @@ export default function App() {
   //
   // You're welcome to swap in your own component to render if your boot up
   // sequence is too slow though.
-  if (!rootStore) {
+  if (!state) {
     return null
+  }
+
+  const initTwilio = async () => {
+    setState({...state, isLoading: true})
+    const token = await getAuthToken()
+  
+    if (Platform.OS === 'android') {
+      await getMicrophonePermission()
+    }
+  
+    await Twilio.initWithToken(token)
+  
+    Twilio.addEventListener('deviceReady', () => {
+      setState({...state, twilioInitialized: true, isLoading: false})
+    })
+  
+    if (Platform.OS === 'ios') {
+      Twilio.configureCallKit({
+        appName: 'Twilio Call'
+      })
+    }
+  }
+
+  const makeCall = (to: string) => Twilio.connect({ To: to })
+
+  const renderInitialize = () => <Button onPress={initTwilio}>
+    <View>
+      <Text text='Initialize Twilio Call'/>
+    </View>
+  </Button>
+
+  const renderMakeCal = () => <View>
+    <TextField label='What number do you want to call to?' onChangeText={text => {
+      setState({
+        ...state,
+        callTo: text
+      })
+    }} />
+
+    <Button disabled={!state.twilioInitialized} onPress={() => makeCall(state.callTo)} style={{backgroundColor: state.twilioInitialized ? 'blue' : color.palette.lightGrey}}>
+      <View>
+        <Text text='Make the call!' style={{color: 'white'}} />
+      </View>
+    </Button>
+  </View>
+
+  const renderContent = () => {
+    if (state.twilioInitialized) {
+      return renderMakeCal()
+    }
+    else if (state.isLoading) {
+      return <ActivityIndicator />
+    }
+    else {
+      return renderInitialize()
+    }
   }
 
   // otherwise, we're ready to render the app
   return (
-    <RootStoreProvider value={rootStore}>
-      <BackButtonHandler canExit={canExit}>
-        <StatefulNavigator />
-      </BackButtonHandler>
-    </RootStoreProvider>
+    <Screen style={{alignItems: 'center', justifyContent: 'center'}}>
+      {renderContent()}
+    </Screen>
   )
 }

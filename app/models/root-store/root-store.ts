@@ -6,6 +6,9 @@ import { NavigationStoreModel } from "../../navigation/navigation-store"
  */
 export const RootStoreModel = types.model("RootStore").props({
   navigationStore: types.optional(NavigationStoreModel, {}),
+  twilioInitialized: types.optional(types.boolean, false),
+  callTo: types.optional(types.maybeNull(types.string), ""),
+  isLoading: types.optional(types.boolean, false)
 })
 
 /**
