@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "959228422596",
+    "firebase_url": "https://twiliocall-db473.firebaseio.com",
+    "project_id": "twiliocall-db473",
+    "storage_bucket": "twiliocall-db473.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959228422596:android:d08c412b62785692fe9c91",
+        "android_client_info": {
+          "package_name": "com.twiliocall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "959228422596-4j9pjgv1upr7ck9bnj14ltvegc0dph6r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf8b5vyjq4BU3oH2n62GRX5zXfMmc9T_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "959228422596-4j9pjgv1upr7ck9bnj14ltvegc0dph6r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
