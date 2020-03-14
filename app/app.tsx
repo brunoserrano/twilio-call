@@ -101,6 +101,14 @@ export default function App() {
   }
 
   const initTwilio = async () => {
+    Twilio.addEventListener('deviceReady', () => {
+      console.warn("ready")
+      setState({...state, twilioInitialized: true, isLoading: false})
+    })
+    Twilio.addEventListener('deviceNotReady', error => {
+      console.warn(`not ready: ${error}`)
+    })
+
     setState({...state, isLoading: true})
     const token = await getAuthToken()
   
@@ -109,10 +117,6 @@ export default function App() {
     }
   
     await Twilio.initWithToken(token)
-  
-    Twilio.addEventListener('deviceReady', () => {
-      setState({...state, twilioInitialized: true, isLoading: false})
-    })
   
     if (Platform.OS === 'ios') {
       Twilio.configureCallKit({
