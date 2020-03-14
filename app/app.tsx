@@ -51,7 +51,7 @@ Object.defineProperty(ReactNative, "AsyncStorage", {
 const canExit = (routeName: string) => contains(routeName, exitRoutes)
 
 const getAuthToken = () => {
-  return fetch('http://b8a63657.ngrok.io/accessToken', {
+  return fetch('https://3b0e039c.ngrok.io/accessToken', {
     method: 'get'
   })
   .then(response => response.text())
