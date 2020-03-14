@@ -21,6 +21,26 @@
         </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+
+      <!-- Twilio Voice -->
+      <!-- [START fcm_listener] -->
+      <service
+          android:name="com.hoxfon.react.RNTwilioVoice.fcm.VoiceFirebaseMessagingService">
+          <intent-filter>
+              <action android:name="com.google.firebase.MESSAGING_EVENT" />
+          </intent-filter>
+      </service>
+      <!-- [END fcm_listener] -->
+      <!-- [START instanceId_listener] -->
+      <service
+          android:name="com.hoxfon.react.RNTwilioVoice.fcm.VoiceFirebaseInstanceIDService"
+          android:exported="false">
+          <intent-filter>
+              <action android:name="com.google.android.gms.iid.InstanceID" />
+          </intent-filter>
+      </service>
+      <!-- [END instanceId_listener] -->
+      <!-- Twilio Voice -->
     </application>
 
 </manifest>
