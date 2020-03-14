@@ -4,7 +4,7 @@
 
 import "./i18n"
 import React, { useState, useEffect } from "react"
-import { YellowBox, PermissionsAndroid, Platform, TouchableHighlight, View, TouchableOpacity, ActivityIndicator } from "react-native"
+import { YellowBox, PermissionsAndroid, Platform, TouchableHighlight, View, TouchableOpacity, ActivityIndicator, Alert, Keyboard, TextInput } from "react-native"
 import { StatefulNavigator, BackButtonHandler, exitRoutes } from "./navigation"
 import { RootStore, RootStoreProvider, setupRootStore } from "./models/root-store"
 import Twilio from "react-native-twilio-programmable-voice"
@@ -121,7 +121,16 @@ export default function App() {
     }
   }
 
-  const makeCall = (to: string) => Twilio.connect({ To: to })
+  var keyboard = React.createRef<TextInput>();
+  const makeCall = (to: string) => {
+    Keyboard.dismiss()
+    Alert.alert(
+      'Are you sure?',
+      `Are we really calling ${to}?`, [
+        {text: 'Hell yeah!', onPress: () => Twilio.connect({ To: to })},
+        {text: 'Hmm, better not to', onPress: () => keyboard?.current?.focus()}
+      ])
+  }
 
   const renderInitialize = () => <Button onPress={initTwilio}>
     <View>
@@ -130,12 +139,17 @@ export default function App() {
   </Button>
 
   const renderMakeCal = () => <View>
-    <TextField label='What number do you want to call to?' onChangeText={text => {
-      setState({
-        ...state,
-        callTo: text
-      })
-    }} />
+    <TextField label='What number do you want to call to?'
+      forwardedRef={keyboard}
+      autoFocus={true}
+      keyboardType='phone-pad'
+      inputStyle={{borderColor: 'black', borderWidth: 1, borderRadius: 8, marginTop: 8, textAlign: 'center'}}
+      onChangeText={text => {
+        setState({
+          ...state,
+          callTo: text
+        })
+      }} />
 
     <Button disabled={!state.twilioInitialized} onPress={() => makeCall(state.callTo)} style={{backgroundColor: state.twilioInitialized ? 'blue' : color.palette.lightGrey}}>
       <View>
