@@ -107,6 +107,7 @@ export default function App() {
     })
     Twilio.addEventListener('deviceNotReady', error => {
       console.warn(`not ready: ${error}`)
+      setState({...state, twilioInitialized: false, isLoading: false})
     })
 
     setState({...state, isLoading: true})
